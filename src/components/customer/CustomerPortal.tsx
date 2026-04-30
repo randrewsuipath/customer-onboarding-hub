@@ -9,15 +9,17 @@ interface CustomerPortalProps {
   onboardingCase: OnboardingCase;
   notifications: Notification[];
   onConfirmBankAccount: () => void;
+  onUploadDocument?: () => void;
+  onSendMessage?: () => void;
 }
-export function CustomerPortal({ onboardingCase, notifications, onConfirmBankAccount }: CustomerPortalProps) {
+export function CustomerPortal({ onboardingCase, notifications, onConfirmBankAccount, onUploadDocument, onSendMessage }: CustomerPortalProps) {
   return (
     <div className="space-y-6">
       <HeroPanel onboardingCase={onboardingCase} />
       <ProgressTracker currentStage={onboardingCase.stage} />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <CustomerActionPanel onConfirm={onConfirmBankAccount} />
+          <CustomerActionPanel onConfirm={onConfirmBankAccount} onUploadDocument={onUploadDocument} onSendMessage={onSendMessage} />
           <DocumentCards documents={onboardingCase.documents} />
         </div>
         <div className="space-y-6">

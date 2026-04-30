@@ -28,6 +28,18 @@ export function HomePage() {
     };
     setNotifications([...notifications, newNotification]);
   };
+
+  const handleUploadDocument = () => {
+    toast.info('Document upload', {
+      description: 'Upload dialog would open here to select supporting documents.',
+    });
+  };
+
+  const handleSendMessage = () => {
+    toast.info('Send message', {
+      description: 'Message dialog would open here to contact the operations team.',
+    });
+  };
   const handleApprove = () => {
     toast.success('Onboarding approved!', {
       description: 'Supplier record is being created in ERP.',
@@ -186,6 +198,8 @@ export function HomePage() {
               onboardingCase={onboardingCase}
               notifications={notifications}
               onConfirmBankAccount={handleConfirmBankAccount}
+              onUploadDocument={handleUploadDocument}
+              onSendMessage={handleSendMessage}
             />
           )}
           {currentView === 'operations' && (
