@@ -2,10 +2,8 @@ import { AlertCircle, CheckCircle, Upload, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 interface CustomerActionPanelProps {
   onConfirm: () => void;
-  onUploadDocument?: () => void;
-  onSendMessage?: () => void;
 }
-export function CustomerActionPanel({ onConfirm, onUploadDocument, onSendMessage }: CustomerActionPanelProps) {
+export function CustomerActionPanel({ onConfirm }: CustomerActionPanelProps) {
   return (
     <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-6">
       <div className="flex items-start gap-3 mb-4">
@@ -49,7 +47,6 @@ export function CustomerActionPanel({ onConfirm, onUploadDocument, onSendMessage
           Confirm This Account
         </Button>
         <Button
-          onClick={onUploadDocument}
           variant="outline"
           className="flex-1 border-gray-300 hover:bg-gray-50"
         >
@@ -57,7 +54,6 @@ export function CustomerActionPanel({ onConfirm, onUploadDocument, onSendMessage
           Upload Supporting Document
         </Button>
         <Button
-          onClick={onSendMessage}
           variant="outline"
           className="border-gray-300 hover:bg-gray-50"
         >

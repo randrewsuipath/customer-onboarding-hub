@@ -1,148 +1,165 @@
-// Home page of the app, Currently a demo page for demonstration.
-// Please rewrite this file to implement your own logic. Do not replace or delete it, simply rewrite this HomePage.tsx file.
-import { useEffect } from 'react'
-import { Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { Toaster, toast } from '@/components/ui/sonner'
-import { create } from 'zustand'
-import { useShallow } from 'zustand/react/shallow'
-import { AppLayout } from '@/components/layout/AppLayout'
-
-// Timer store: independent slice with a clear, minimal API, for demonstration
-type TimerState = {
-  isRunning: boolean;
-  elapsedMs: number;
-  start: () => void;
-  pause: () => void;
-  reset: () => void;
-  tick: (deltaMs: number) => void;
-}
-
-const useTimerStore = create<TimerState>((set) => ({
-  isRunning: false,
-  elapsedMs: 0,
-  start: () => set({ isRunning: true }),
-  pause: () => set({ isRunning: false }),
-  reset: () => set({ elapsedMs: 0, isRunning: false }),
-  tick: (deltaMs) => set((s) => ({ elapsedMs: s.elapsedMs + deltaMs })),
-}))
-
-// Counter store: separate slice to showcase multiple stores without coupling
-type CounterState = {
-  count: number;
-  inc: () => void;
-  reset: () => void;
-}
-
-const useCounterStore = create<CounterState>((set) => ({
-  count: 0,
-  inc: () => set((s) => ({ count: s.count + 1 })),
-  reset: () => set({ count: 0 }),
-}))
-
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
+import { useState } from 'react';
+import { Building2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Toaster, toast } from '@/components/ui/sonner';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { CustomerPortal } from '@/components/customer/CustomerPortal';
+import { mockOnboardingCase, mockNotifications } from '@/data/mockData';
+import { OnboardingCase, Notification, OnboardingStage, OnboardingStatus } from '@/types/onboarding';
+type View = 'customer' | 'operations' | 'timeline' | 'script';
 export function HomePage() {
-  // Select only what is needed to avoid unnecessary re-renders
-  const { isRunning, elapsedMs } = useTimerStore(
-    useShallow((s) => ({ isRunning: s.isRunning, elapsedMs: s.elapsedMs })),
-  )
-  const start = useTimerStore((s) => s.start)
-  const pause = useTimerStore((s) => s.pause)
-  const resetTimer = useTimerStore((s) => s.reset)
-  const count = useCounterStore((s) => s.count)
-  const inc = useCounterStore((s) => s.inc)
-  const resetCount = useCounterStore((s) => s.reset)
-
-  // Drive the timer only while running; avoid update-depth issues with a scoped RAF
-  useEffect(() => {
-    if (!isRunning) return
-    let raf = 0
-    let last = performance.now()
-    const loop = () => {
-      const now = performance.now()
-      const delta = now - last
-      last = now
-      // Read store API directly to keep effect deps minimal and stable
-      useTimerStore.getState().tick(delta)
-      raf = requestAnimationFrame(loop)
-    }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
-  }, [isRunning])
-
-  const onPleaseWait = () => {
-    inc()
-    if (!isRunning) {
-      start()
-      toast.success('Building your app…', {
-        description: 'Hang tight, we\'re setting everything up.',
-      })
-    } else {
-      pause()
-      toast.info('Taking a short pause', {
-        description: 'We\'ll continue shortly.',
-      })
-    }
-  }
-
-  const formatted = formatDuration(elapsedMs)
-
+  const [currentView, setCurrentView] = useState<View>('customer');
+  const [onboardingCase, setOnboardingCase] = useState<OnboardingCase>(mockOnboardingCase);
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const handleConfirmBankAccount = () => {
+    toast.success('Bank account confirmed', {
+      description: 'Your confirmation has been submitted for review.',
+    });
+    const newNotification: Notification = {
+      id: `notif-${Date.now()}`,
+      message: 'You confirmed the bank account belongs to Apex Industrial Services',
+      timestamp: new Date().toISOString(),
+      type: 'success',
+    };
+    setNotifications([...notifications, newNotification]);
+  };
+  const handleApprove = () => {
+    toast.success('Onboarding approved!', {
+      description: 'Supplier record is being created in ERP.',
+    });
+    setOnboardingCase({
+      ...onboardingCase,
+      stage: OnboardingStage.Complete,
+      status: OnboardingStatus.Complete,
+      progress: 100,
+    });
+    const completionNotifications: Notification[] = [
+      {
+        id: `notif-${Date.now()}-1`,
+        message: 'Your onboarding has been approved by Jordan Lee',
+        timestamp: new Date().toISOString(),
+        type: 'success',
+      },
+      {
+        id: `notif-${Date.now()}-2`,
+        message: 'Supplier record created in Northstar Energy ERP',
+        timestamp: new Date(Date.now() + 1000).toISOString(),
+        type: 'success',
+      },
+      {
+        id: `notif-${Date.now()}-3`,
+        message: 'Welcome package sent to maya.chen@apexindustrial.com',
+        timestamp: new Date(Date.now() + 2000).toISOString(),
+        type: 'info',
+      },
+    ];
+    setTimeout(() => {
+      setNotifications([...notifications, ...completionNotifications]);
+    }, 500);
+  };
   return (
     <AppLayout>
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 overflow-hidden relative">
-        <ThemeToggle />
-        <div className="absolute inset-0 bg-gradient-rainbow opacity-10 dark:opacity-20 pointer-events-none" />
-        <div className="text-center space-y-8 relative z-10 animate-fade-in">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary floating">
-              <Sparkles className="w-8 h-8 text-white rotating" />
+      <div className="min-h-screen bg-gray-50">
+        <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
+                  <Building2 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">Customer Onboarding Hub</h1>
+                  <p className="text-xs text-gray-500">Northstar Energy</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={currentView === 'customer' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentView('customer')}
+                  className={currentView === 'customer' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                >
+                  Customer View
+                </Button>
+                <Button
+                  variant={currentView === 'operations' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentView('operations')}
+                  className={currentView === 'operations' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  disabled
+                >
+                  Operations View
+                </Button>
+                <Button
+                  variant={currentView === 'timeline' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentView('timeline')}
+                  className={currentView === 'timeline' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  disabled
+                >
+                  Automation Timeline
+                </Button>
+                <Button
+                  variant={currentView === 'script' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setCurrentView('script')}
+                  className={currentView === 'script' ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                  disabled
+                >
+                  Demo Script
+                </Button>
+              </div>
             </div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-balance leading-tight">
-            Creating your <span className="text-gradient">app</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto text-pretty">
-            Your application would be ready soon.
-          </p>
-          <div className="flex justify-center gap-4">
-            <Button 
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {currentView === 'customer' && (
+            <CustomerPortal
+              onboardingCase={onboardingCase}
+              notifications={notifications}
+              onConfirmBankAccount={handleConfirmBankAccount}
+            />
+          )}
+          {currentView === 'operations' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Operations Console</h2>
+              <p className="text-gray-600">Coming in Phase 2</p>
+            </div>
+          )}
+          {currentView === 'timeline' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Automation Timeline</h2>
+              <p className="text-gray-600">Coming in Phase 3</p>
+            </div>
+          )}
+          {currentView === 'script' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Demo Script</h2>
+              <p className="text-gray-600">Coming in Phase 3</p>
+            </div>
+          )}
+        </main>
+        {onboardingCase.status === OnboardingStatus.HumanReviewRequired && (
+          <div className="fixed bottom-6 right-6 z-20">
+            <Button
+              onClick={handleApprove}
               size="lg"
-              onClick={onPleaseWait}
-              className="btn-gradient px-8 py-4 text-lg font-semibold hover:-translate-y-0.5 transition-all duration-200"
-              aria-live="polite"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
             >
-              Please Wait
+              Approve Onboarding (Demo)
             </Button>
           </div>
-          <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-            <div>
-              Time elapsed: <span className="font-medium tabular-nums text-foreground">{formatted}</span>
+        )}
+        {onboardingCase.status === OnboardingStatus.Complete && (
+          <div className="fixed bottom-6 right-6 z-20">
+            <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg">
+              <p className="font-semibold">✓ Onboarding Complete</p>
+              <p className="text-sm text-green-100">Supplier record created</p>
             </div>
-            <div>
-              Coins: <span className="font-medium tabular-nums text-foreground">{count}</span>
-            </div>
           </div>
-          <div className="flex justify-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => { resetTimer(); resetCount(); toast('Reset complete') }}>
-              Reset
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => { inc(); toast('Coin added') }}>
-              Add Coin
-            </Button>
-          </div>
-        </div>
-        <footer className="absolute bottom-8 text-center text-muted-foreground/80">
-          <p>Powered by Cloudflare</p>
-        </footer>
-        <Toaster richColors closeButton />
+        )}
+        <Toaster richColors closeButton position="top-right" />
       </div>
     </AppLayout>
-  )
+  );
 }
