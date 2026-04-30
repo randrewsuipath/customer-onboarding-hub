@@ -2,7 +2,7 @@
 
 A polished, enterprise-grade web application demonstrating end-to-end customer onboarding orchestration. This demo showcases how a modern customer-facing portal sits in front of internal automations, making the onboarding process transparent to external customers while revealing how internal systems, document processing, human approvals, and UiPath robots work behind the scenes.
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/randrewsuipath/customer-onboarding-hub)
 
 ## Overview
 
@@ -181,7 +181,7 @@ The application includes mock state transitions:
 
 ### Deploy to Cloudflare Pages
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/randrewsuipath/customer-onboarding-hub)
 
 #### Manual Deployment
 
