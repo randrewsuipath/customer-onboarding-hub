@@ -5,6 +5,8 @@ import { Toaster, toast } from '@/components/ui/sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { CustomerPortal } from '@/components/customer/CustomerPortal';
 import { OperationsConsole } from '@/components/operations/OperationsConsole';
+import { AutomationTimeline } from '@/components/timeline/AutomationTimeline';
+import { DemoScript } from '@/components/script/DemoScript';
 import { mockOnboardingCase, mockNotifications } from '@/data/mockData';
 import { mockAutomationEvents } from '@/data/mockOperationsData';
 import { OnboardingCase, Notification, OnboardingStage, OnboardingStatus, AutomationEvent, AutomationEventType } from '@/types/onboarding';
@@ -163,7 +165,6 @@ export function HomePage() {
                   size="sm"
                   onClick={() => setCurrentView('timeline')}
                   className={currentView === 'timeline' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                  disabled
                 >
                   Automation Timeline
                 </Button>
@@ -172,7 +173,6 @@ export function HomePage() {
                   size="sm"
                   onClick={() => setCurrentView('script')}
                   className={currentView === 'script' ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                  disabled
                 >
                   Demo Script
                 </Button>
@@ -180,7 +180,7 @@ export function HomePage() {
             </div>
           </div>
         </nav>
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className={currentView === 'timeline' || currentView === 'script' ? '' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8'}>
           {currentView === 'customer' && (
             <CustomerPortal
               onboardingCase={onboardingCase}
@@ -201,18 +201,8 @@ export function HomePage() {
               onSendNotification={handleSendNotification}
             />
           )}
-          {currentView === 'timeline' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Automation Timeline</h2>
-              <p className="text-gray-600">Coming in Phase 3</p>
-            </div>
-          )}
-          {currentView === 'script' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Demo Script</h2>
-              <p className="text-gray-600">Coming in Phase 3</p>
-            </div>
-          )}
+          {currentView === 'timeline' && <AutomationTimeline />}
+          {currentView === 'script' && <DemoScript />}
         </main>
         {onboardingCase.status === OnboardingStatus.HumanReviewRequired && currentView === 'operations' && (
           <div className="fixed bottom-6 right-6 z-20">
